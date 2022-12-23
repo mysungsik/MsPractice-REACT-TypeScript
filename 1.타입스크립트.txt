@@ -1,0 +1,238 @@
+<기본 정의> =====================================================================================================================================================================
+
+1. 타입스크립트는 자바스크립트의 "슈퍼셋(superset)" 이다.
+
+    : "자바스크립트를 기반"으로 "추가적인 기능" 을 넣은 언어란 뜻이다.
+
+2. 동적 타입과 정적 타입
+
+    타입스크립트는 정적 타입 을 가지기에, 타입 스크립트이다.
+    대게 자바스크립트는 동적 타입을 가진다.
+
+    "정적 타입"이란, "변수의 타입을 고정시키고 사용 하는 것"이다.
+        마치 String(3) 이나 Number(3) 처럼
+
+    "동적 타입"이란, 자바스크립트의, "암묵적 정의 에 의해 정해지는 변수의 타입"을 가지고 사용 하는것이다.
+        자바스크립트의 판단에 따라, 3 이 Number 가 될수도, "3" 처럼 String 이 될수도 있다.
+
+3. 정적 타입의 장점
+
+    1. 협업을 요구하는 작업의 특성상, 타입이 정해져 있어야, 의도를 정확하게 파악할 수 있다.
+
+    2. 코드가 타입에 의해, 결과가 의도하지 않은 대로 흘러 가는 일을 막을 수 있다.
+
+    <자바스크립트>
+        function add (a,b){
+            return a + b
+        }
+
+        const result = add(2,3)         //  5
+        const result2 = add("2","3")    // "23"
+
+
+    <타입스크립트>
+        function add (a: number ,b: number){
+            return a + b
+        }
+
+        const result = add(2,3)         // 5
+        const result2 = add("2","3")    // "에러 string 사용 불가"
+
+
+4. 브라우저는 "타입스크립트"를 이해하지 못한다.
+
+    브라우저가 이해할 수 있는것은 자바스크립트 언어 이다.
+
+    그러므로, "타입스크립트" 파일을 "자바스크립트 파일"로 "컴파일 시켜야 한다."
+
+    컴파일 명령어는 
+    
+    npx tsc ...
+        
+        https://www.typescriptlang.org/download
+
+< 사용 > =======================================================================================================================================
+
+1. 설치
+
+    https://www.typescriptlang.org/download
+
+    npm install typescript --save-dev
+
+2. 컴파일 하기
+
+    1) 특정 파일 컴파일
+    
+        npx tsc xxx.ts
+
+3. 컴파일을 하면, 타입스크립트가 에러를 찾아준다.
+
+    [에러 콘솔]
+        basic.ts:6:21 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'.
+
+        6 const result2 = add("2","3")
+                        ~~~
+
+< 타입스크립트 문법과 사용 >
+
+1. 원시형 값에 대하여
+
+        let age: number;
+        age = 12;
+        age = "12" // error
+
+        let name: string;
+        name = "ms";
+
+        let isName: boolean;
+        isName = true;
+
+    * 타입은 반드시 소문자여야한다
+
+        let age:Number   // 자바스크립트 객체 Number 를 가르킨다.
+
+2. 배열에 대하여
+
+    ArrayName : 타입[]  으로 지정한다.
+     
+        let hobbies: string[];      // "하비" 라는 배열을 만들것인데,. string 타입의 배열이다.
+        hobbies = ["soccer", "baseball"];
+        
+        let special: string[] = ["soccer", "baseball"];     // 한번에 정리
+
+3. 객체에 대하여
+
+    ObjName : {
+        프로퍼티이름 : 타입
+        프로퍼티이름 : 타입2 ...
+    }
+
+        let animal: {       // "애니멀이란 객체를 생성할 건데", 타입은 이렇다 지정
+            name: string;   // ; 으로 한줄씩 마무리
+            age: number;
+        };
+
+        animal = {
+            name: "js",
+            age: 23,
+        };
+
+4. 배열과 객체의 혼합
+    
+    let animals: {      // "애니멀"  이란 배열이 있는 객체를 생성할 것인데, 객체 안의 타입은 저렇다.
+        name: string;
+        age: number;
+    }[];
+    
+        animals = [
+            { name: "cs", age: 5 },
+            { name: "bs", age: 25 },
+            { name: "ks", age: 35 },
+        ];
+
+        
+    let animals: { name: string; age: number }[] = [    // 한번에
+        { name: "cs", age: 5 },
+        { name: "bs", age: 25 },
+        { name: "ks", age: 35 },
+    ];
+        
+5. 타입 스크립트의 강력한 타입 추론
+    
+        let course = "React";
+        
+        course = 123  // error
+            
+    course 의 값을 "String" 으로 지정하고 변수를 초기화했다.
+    그러므로, course 는 자동으로  course:string 이 된 것이다.
+    그러므로 course 에 number 값인 123 을 넣으면 에러가 발생한다.
+        
+    이렇게, 초기화한 변수의 타입을 추론해, 적용시키는 것이, 타입스크립트의 큰 장점이자, 기능이다.
+        
+    앞으로는 이런식으로, 직접 명명 하기보단, "타입추론" 을 사용해, 처리 하는 것이 더 좋을 것이다.
+    다만 반드시 필요할 때에는 명명할 것이다.
+    
+6. 여러 타입이 존재하는 변수 생성 - union
+    
+    number 와 string 의 타입이 동시에 존재하는 "멀티 타입의 값을 만들자" - union 을 사용하여
+    
+        let food: string | number = "potato";
+        
+        food = 3;
+    
+    타입을 여러개 정했기 때문에, 숫자도, 문자도 가능하다.
+        
+    * 타입 추론은 안된다.
+    
+7. 똑같은 타입을 사용하면, 타입 자체를 변수에 넣고, 여러군데 사용하기 - 타입 별칭(Type aliases)  *** 나중에 아웃소싱 할때 필수
+    
+    type Person = {     // Person 이란 타입은, 저렇게 될 것이다.
+        name: string;
+        age: number;
+    };
+    
+    const people: Person = {    // 미리 정해놓은 타입을 입력한다.
+        name: "js",
+        age: 23,
+    };
+    
+    const friends: Person[] = [     // 미리 정해놓은 타입을 입력한다.(배열에 혼합하여)
+        { name: "cs", age: 23 },
+        { name: "ys", age: 52 },
+    ];
+    
+8. 함수 의 타입
+    
+    
+    function moreAdd(a: number, b: number): number {    // 파라미터, 결과까지 전부 지정
+        return a + b;
+    }
+    
+ 
+    function lessAdd(a: number, b: number) {       // 파라미터만 지정, 결과는 추론으로 나오도록
+        return a + b;
+    }
+    
+9. 타입 void
+    
+        function justPrint() {
+            console.log("print");
+        }
+    
+    마우스를 올려보면, [ justPring() : void ] 라는 타입을 볼 수 있다.
+    이는 "undefined 와 거의 동일"하다고 보면 된다.
+    "void 타입"은, 함수의 "리턴"이 없을 경우 나오는 타입이다.
+    
+10. 제네릭
+    
+        function insertAtBeginning(array: any[], value: any) {
+            return [value, ...array];
+        }
+        
+        const demoArray = [1, 2, 3];
+        const demoStrArray = ["a", "b", "c"];
+        
+        const newArray = insertAtBeginning(demoArray, 4);
+        const stringArray = insertAtBeginning(demoStrArray, "d");
+            
+    ==> 둘 다, 결과값이 any 이다. == 타입스크립트의 도움을 전혀 받을 수 없다.
+    둘 모두의 결과값이, 파라미터의 타입을 따르게 만들 수 있다.
+        
+    < > 안에, 타입의 파라미터 같은 것을 만드는 것
+
+        function gendricsInsertAtBeginning<T>(array: T[], value: T) {
+            return [value, ...array];
+        }
+        
+        const gendricsDemoArray = [1, 2, 3];
+        const gendricsDemoStrArray = ["a", "b", "c"];
+        
+        const newGendricsArray = gendricsInsertAtBeginning(gendricsDemoArray, 4);
+        const stringGendricsArray = gendricsInsertAtBeginning(gendricsDemoStrArray,"d");
+        
+    ==> 둘 모두의 결과값이, 파라미터의 값을 따라간다.
+    만약 두개의 파라미터가 서로 타입이 같지 않다면
+    제네릭에 의해, 오류가 발생될 것이다.
+    이는 타입스크립트로 타입검증을 한 것이다.
+    
+

@@ -1,0 +1,201 @@
+[최고의 레퍼런스..!!]
+    https://bluelight.co/blog/redux-toolkit-with-typescript#Getting-Started-with-the-Redux-Toolkit
+
+[ 1. Slice 만들기 ]
+
+    <기존과 다른점>
+
+        1. "initialState" 의 "타입"을 정해야한다.
+        2. "PayloadAction" 을 통해, "action 으로 받은 payload 의 타입을 정해야 한다".
+
+    < 코드 "store/ms-Slice.tsx" >
+
+        import { createSlice, PayloadAction } from "@reduxjs/toolkit";  // 페이로드액션 을 import
+
+        export type MsState = {                                         // 타입 아웃소싱
+          msValue: string;
+          msArrayObj: { name: string; age: number }[];
+        };
+        
+        const initialState: MsState = {   // 똑같이 이니셜 스테이트, 대신 타입을 입력해야한다.
+          msValue: "",
+          msArrayObj: [
+            { name: "js", age: 23 },
+            { name: "cs", age: 15 },
+          ],
+        };
+        
+        const msSlice = createSlice({
+          name: "ms",
+          initialState,
+          reducers: {
+            showMs(state) {
+              console.log(state.msValue);
+            },
+            changeMs(state, action: PayloadAction<string>) {     // action 의 타입을 PayloadAction 을 사용해, 페이로드의 <> 타입을 정한다
+              state.msValue = action.payload;
+            },
+            showMsObj(state) {
+              console.log(state.msArrayObj);            // 이부분을 잘 기억하자 : proxy 가 나오는 오류의 원인이 된다.
+            },
+            plusMs(state, action: PayloadAction<{ name: string; age: number }>) {
+              state.msArrayObj = [...state.msArrayObj, action.payload];
+            },
+          },
+        });
+        
+        export const msAction = msSlice.actions;
+        
+        export default msSlice.reducer;
+        
+
+[2. 스토어 만들기]
+
+    < 기존과 다른점 >
+        1. RootState    변수를 정해, ReturnType<typeof store.getState> 로 타입을 넣는다.
+        2. AppDispatch  변수를 정해, typeof store.dispatch 로 dispatch 의 타입을 넣는다.
+
+    <코드 "store/index.js">
+
+        import { configureStore } from "@reduxjs/toolkit";
+        import msSlice from "./ms-Slice";
+
+        export const store = configureStore({
+            reducer: msSlice,
+        });
+
+        export type RootState = ReturnType<typeof store.getState>;
+        export type AppDispatch = typeof store.dispatch;
+
+[3. 스토어 공급하기 ]
+
+    < 기존과 다른점 >
+        : 없음
+
+        import ReactDOM from "react-dom/client";
+        import "./index.css";
+        import App from "./App";
+        import Layout from "./layout/layout";
+        import { store } from "./store";
+        import { Provider } from "react-redux";
+
+        const root = ReactDOM.createRoot(
+        document.getElementById("root") as HTMLElement
+        );
+        root.render(
+            <Provider store={store}>
+                <Layout>
+                    <App />
+                </Layout>
+            </Provider>
+        );
+
+[4. useDispatch 와 useSelector 사용하여, 스토어의 값 사용하기 ]
+
+    < 기존과 다른점 >
+
+        1. props 사용을 위해, 컴포넌트함수(FuntionalComponent, FC) 에 : React.FC<{ props 에서 받을 값의 타입 }> 을 정했다.
+            * 물론 리덕스랑은 관계 없다.
+        2. Store의 State 를 가져오기 위해, useSelector 를 사용했고, 
+            "state"의 "타입"을 "RootState"에서 가져와 그것으로 정했다.
+
+    < 코드 "components/Todos.tsx">
+
+        import React from "react";
+        import { Todo } from "../models/todos";
+        import { useSelector, useDispatch } from "react-redux";
+        import { RootState } from "../store";           // state가져오기 위한 type [store 에서 정의함]
+        import { msAction } from "../store/ms-Slice";
+
+        const Todos: React.FC<{
+            items: Todo[];
+            amount: number;
+        }> = (props) => {
+
+            const msValue = useSelector((state: RootState) => state.msValue);   // state 의 타입은 RootState
+            const msObj = useSelector((state: RootState) => state.msArrayObj);  // state 의 타입은 RootState
+            const dispatch = useDispatch();
+
+            function showHandler() {
+                dispatch(msAction.showMs());
+            }
+
+            function changeMS() {
+                dispatch(msAction.changeMs("lol"));
+            }
+
+            function showMsObj() {
+                dispatch(msAction.showMsObj())      // 오류발생! proxy 가 나온다!
+            }
+
+            function plusMsObj() {
+                dispatch(msAction.plusMs({ name: "lol", age: 23 }));
+            }
+
+            return (
+                <div>
+                    <ul>
+                        {props.items.map((item) => (
+                        <li key={item.phone}>{item.name}</li>
+                        ))}
+                    </ul>
+                    <button onClick={changeMS}> 이름변경 </button>
+                    <button onClick={showHandler}> 이름 보이기 </button>
+                    <button onClick={plusMsObj}> 오브젝트 추가 </button>
+                    <button onClick={showMsObj}> 오브젝트 보이기 </button>
+                </div>
+            );
+        };
+
+        export default Todos;
+
+[5. 오류발생 ! 결과값이 Porxy 로 나온다 ! ]
+
+    전에, redux store 에서 가져온 State 들을 꼭 빼서 사용하자고 다짐했었다.
+
+    이번에도 마찬가지로 그에 해당하는 오류가 발생했다.
+    
+        * 어떤 이유에서 인지는 모르나...
+
+    <오류>
+
+        [ 슬라이스에서, 정의된 action]
+            showMsObj(state) {
+                console.log(state.msArrayObj);
+            },
+
+        [ 컴포넌트에서 사용한 dispatch]
+
+            function showMsObj() {
+                dispatch(msAction.showMsObj())      // 오류발생! proxy 가 나온다!
+            }
+
+        [ 결과 ]
+
+            Proxy {0: {…}}
+           
+    <해결>
+
+        그냥, msArrayObj 자체를 참조하여, log를 보면 잘 보인다.
+
+        
+        [ 컴포넌트에서 사용한 dispatch]
+
+            function showMsObj() {
+                const showMs = [...msObj];      // 한번 빼서 사용
+                console.log(showMs);
+            }
+
+        [ 결과 ]
+
+            (3) [{…}, {…}, {…}] 
+                0: {name: 'js', age: 23}
+                1: {name: 'cs', age: 15}
+                2: {name: 'lol', age: 23}
+                length: 3
+                [[Prototype]]: Array(0)
+
+        
+
+
+    

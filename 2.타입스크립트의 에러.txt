@@ -1,0 +1,27 @@
+1. 컴파일하면 동일한 이름의 .js 에 의해, 변수이름이 redeclare 되었다고 나온다.
+
+    <시작>
+        basic.ts 컴파일
+
+    <결과>
+        basic.ts
+        basic.js (생성)
+
+    <원인>
+        그로인해, 둘이 한곳에 있는 파일로 여겨져
+        basic.ts 의 변수가 redeclare 되었다고 나온다.
+
+    <해결>
+        1. 타입스크립트의 끝에 export { } 를 적는다. **
+
+            function add(a: number, b: number) {
+                return a + b;
+            }
+            
+            const result = add(2, 3);
+            
+            export {};
+
+        2. 혹은 둘중 하나의 이름을 변경한다.
+
+        
