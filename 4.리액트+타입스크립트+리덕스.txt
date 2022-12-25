@@ -96,6 +96,7 @@
 
         1. props 사용을 위해, 컴포넌트함수(FuntionalComponent, FC) 에 : React.FC<{ props 에서 받을 값의 타입 }> 을 정했다.
             * 물론 리덕스랑은 관계 없다.
+
         2. Store의 State 를 가져오기 위해, useSelector 를 사용했고, 
             "state"의 "타입"을 "RootState"에서 가져와 그것으로 정했다.
 
@@ -194,6 +195,106 @@
                 2: {name: 'lol', age: 23}
                 length: 3
                 [[Prototype]]: Array(0)
+
+
+[6. 실전. useRef 를 이용해, 값을 받은 것을, Redux State 에 넣기]
+
+
+    1. [todo-Slice 만들기] ========================================================
+        <store / todo-Slice.tsx>
+
+            import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
+            export type TodoType = {
+                todos: { todoTitle: string; todoText: string }[];   // 타입 aliases
+            };
+
+            const initialState: TodoType = {
+                todos: [{ todoTitle: "첫번째할일", todoText: "일어나기" }], // 초기값 설정
+            };
+
+            const TodoSlice = createSlice({
+                name: "todos",
+                initialState,
+                reducers: {
+                    addTodo( state, action: PayloadAction<{ todoTitle: string; todoText: string }>  // PayloadAction 을 통해어떻게 입력될지 설정 
+                    ) {
+                    state.todos = [...state.todos, action.payload]; // action 함수 설정
+                    },
+                },
+            });
+
+            export const TodoAction = TodoSlice.actions;
+
+            export default TodoSlice.reducer;
+
+    ** 타입 지정(state나 PayloadAction 에서)은, 일단 눈에 보이도록 해두었지만, "타입 별칭" 을 통해, "파일이나, 컴포넌트 내에서 미리 정의하여 아웃소싱하자"
+
+    2. [스토어에 등록] ========================================================
+        <store / index.tsx>
+
+            import { configureStore } from "@reduxjs/toolkit";
+            import msSlice from "./ms-Slice";
+            import todoSlice from "./todo-Slice";
+
+            export const store = configureStore({
+                reducer: {msSlice,todoSlice},       // 리듀서를 내보낸다.
+            });
+
+            export type RootState = ReturnType<typeof store.getState>;      // State 타입 설정 필수
+            export type AppDispatch = typeof store.dispatch;                // 디스패치 타입 설정 필수
+
+    2. [ useRef 와 함께 사용 ] ========================================================
+
+        <components / NewTodo.tsx >
+
+                import React from "react";
+                import { useRef } from "react";
+                import { useDispatch, useSelector } from "react-redux";
+                import { TodoAction } from "../store/todo-Slice";       // Action import
+                import { RootState } from "../store";                   // State 타입 import
+
+                const NewTodo:React.FC = () => {
+                    const dispatch = useDispatch();
+                    const todoState = useSelector((state: RootState) => state.todoSlice.todos);
+                    const todoTitleRef = useRef<HTMLInputElement>(null);
+                    const todoTextRef = useRef<HTMLInputElement>(null);     // HTML input 의 타입, 초기값 지정(null)
+
+                    const todoSumbit = (event: React.FormEvent) => {        // event의 타입
+                        event.preventDefault();
+
+                        const todoTitle = todoTitleRef.current!.value;      // ! 로 바꿔 주어야, addTodo 에 넣을 수 있다.
+                        const todoText = todoTextRef.current!.value;        // ! 로 바꿔야, string 타입이 명확해지고,
+                                                                            //  Slice 를 만들때 분명 string 으로 action 이 들어올 것이라 명명했기 때문에
+                        dispatch(TodoAction.addTodo({ todoTitle, todoText }));
+                    };
+
+                    console.log(todoState);
+                    return (
+                        <div>
+                            <h1> 할일 넣기 </h1>
+                            <form onSubmit={todoSumbit}>
+                                <div>
+                                    <label htmlFor="todoText"></label>
+                                    <input type={"text"} id={"todoText"} ref={todoTitleRef} />
+                                </div>
+                                <div>
+                                    <label htmlFor="todoText"></label>
+                                    <input type={"text"} id={"todoText"} ref={todoTextRef} />
+                                </div>
+                                <div>
+                                    <button> 제출 </button>
+                                </div>
+                            </form>
+                        </div>
+                    );
+                };
+
+                export default NewTodo;
+
+
+
+
 
         
 
