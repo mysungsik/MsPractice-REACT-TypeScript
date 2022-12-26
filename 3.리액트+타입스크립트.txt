@@ -509,10 +509,101 @@
 
 13. 스타일링 지정하기
 
-14. 할일 State 지우는 함수 만들어보기
+14. 할일 State 지우는 함수 만들어보기 (With 상향식 State 전달, func.bind() )
+
+    < App.tsx >
+
+        function App() {
+                ...
+
+            const removeTodo = (todoName: string) => {
+                const newArray = todo.filter((item) => item.name !== todoName);
+                setTodo([...newArray]);
+            };
+            
+            return (
+                <div className="App">
+                <Todos items={todo} removeTodo={removeTodo} />
+                <NewTodo onAddTodo={onAddTodo} />
+                </div>
+            );
+
+    < Todos.tsx >
+
+            const Todos: React.FC<{
+                items: Todo[];
+                removeTodo: (todoName: string) => void;
+            }> = (props) => {
+            
+                return (
+                <div>
+                    <div>
+                    <ul>
+                        {props.items.map((item) => (
+                        <TodoItems key={item.phone} todoName={item.name}  removeTodo={props.removeTodo}/>
+                        ))}
+                    </ul>
+
+    < TodoItem.tsx >
+
+            const TodoItems: React.FC<{
+                todoName: string;
+                removeTodo: (todoName: string) => void;
+            }> = (props) => {
+                const deleteHandler = (name: string) => {
+                    props.removeTodo(name);
+                };
+            
+                return (
+                    <div>
+                        {props.todoName}
+                        <button onClick={deleteHandler.bind(null, props.todoName)}> 삭제</button>
+                    </div>
+                );
+            };
+            
+            export default TodoItems;
+            
+15. context 와 타입스크립트
+
+    < createContext >
+
+        import { useState } from "react";
+        import { createContext } from "react";
+
+        const msContext = createContext<{ name: string; addTodo: (textId: string) => void; }>(
+            {
+            name: "ms",
+            addTodo: (textId) => {
+                return textId;
+            },
+        });
+
+        export const msContextProvider: React.FC<{ children: React.ReactNode }> = (props) => {
+            const [name, setName] = useState("");
+
+            const addTodo = (textId: string) => {
+                return textId;
+            };
+
+            const context: { name: string; addTodo: (textId: string) => string;} = {
+                name: name,
+                addTodo: addTodo,
+            };
+
+            return (
+                <msContext.Provider value={context}> 
+                    {props.children}
+                </msContext.Provider>
+            );
+        };
+
+        export default msContext
 
 
+    // 이후에, App.js 감싸고, 컴포넌트에서 사용하면 된다.
     
+    // 사용은 평소대로, 필요한 것이 있다면, 마우스를 위로 살포시 올려보자. 알려줄 것이다.
 
 
 
