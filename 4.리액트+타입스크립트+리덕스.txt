@@ -55,7 +55,7 @@
         1. RootState    변수를 정해, ReturnType<typeof store.getState> 로 타입을 넣는다.
         2. AppDispatch  변수를 정해, typeof store.dispatch 로 dispatch 의 타입을 넣는다.
 
-    <코드 "store/index.js">
+    <코드 "store/index.tsx">
 
         import { configureStore } from "@reduxjs/toolkit";
         import msSlice from "./ms-Slice";
@@ -71,6 +71,8 @@
 
     < 기존과 다른점 >
         : 없음
+    
+    <코드 "index.tsx">
 
         import ReactDOM from "react-dom/client";
         import "./index.css";

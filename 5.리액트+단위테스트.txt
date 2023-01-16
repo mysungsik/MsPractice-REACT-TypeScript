@@ -1,0 +1,460 @@
+0. jest Docs 
+
+    https://jestjs.io/docs/expect
+
+0. jest 의 expect 등이 자동완성이 안됩니다.
+
+    1) npm install @types/jest 
+
+    까십시오
+
+    2)  root 폴더에
+
+        jsconfig.json 를 만들고
+        
+        {
+            "typeAcquisition": {
+            "include": ["jest"]
+            }
+        }
+        를 넣으십시오
+      
+
+
+0. 테스트의 코드 작성 :  3A
+
+    1) Arrange : 준비단계. 준비 환경을 구성
+    2) Act : 테스트 코드 실행
+    3) Assert : 결과를 검토, 우리의 생각과 같나 확인
+
+1. 무엇을 테스트하고 어떻게 테스트 할까?
+
+    무엇을? 아주아주 작은 블록들을 테스트한다.
+
+    어떻게? 성공했을때, 실패했을때를 만들어 테스트한다.
+
+2. 어디에 작성하고, 어떻게 테스트 코드를 실행하는가?
+
+    테스트코드를 실행하고 값을 받는 도구 : jest
+
+    렌더링(시뮬레이팅) 할 도구: 리액트 테스팅 라이브러리
+
+3. 한번 해보기
+
+    App.test.js 의 코드를 보면,
+
+        test('renders learn react link', () => {
+            render(<App />);
+            const linkElement = screen.getByText(/learn react/i);       // 이 코드를 찾는다.
+            expect(linkElement).toBeInTheDocument();                    // 성공과 실패를 나눈다.
+        });
+
+    npm test 를 치면, 테스트가 실행된다.
+
+    "learn react/" 을 찾고 성공과 실패로 나뉜다.
+
+
+4. App.test.js 는 App.js 를 test 하기 위해서 있는 파일이다. 
+    component 에 Greeting.js 를 만들고 Greeting.test.js 만들어 테스트를 해보자.
+
+5. test 파일 준비하기
+
+    < component / Greeting.js >
+
+            const Greeting = () => {
+                return (
+                <div>
+                    <h2>Greeting !</h2>
+                    <p>Hello world!</p>
+                </div>
+                );
+            };
+            
+            export default Greeting;
+
+    < component / Greeting.test.js >
+
+            test("render hello world as  text", ()=>{
+                ...
+            })
+
+    
+    ==> test 로 시작하는 test 파일에는 
+        "첫번째 인자"로, 어떻게 렌더링(시뮬레이팅) 할지 설명을 적고, 
+        "두번째 인자"로 실제 테스트 코드를 적는다.
+
+
+6. "3A" 의 첫번째 단계(Arrange : 준비) 로, Greeting 컴포넌트를 렌더링한다.
+
+    < component / Greeting.test.js >
+
+            import Greeting from "./Greeting"
+            import {render} from "@testing-library/react"
+            
+            test("render hello world as  text", ()=>{
+                render(<Greeting/>)
+            })
+
+7. "3A" 의 두번째 단계(Act : 준비)
+
+    // 아직은 nothing
+
+8. "3A" 의 마지막 단계(Assert : 확인)
+
+    실제 결과값과 비교하며 확인하기위해,
+
+    Virtual DOM 에 접근할 수 있는 "screen" 옵션을 사용한다.
+
+    
+    < component / Greeting.test.js >
+
+            import Greeting from "./Greeting";
+            import { render, screen } from "@testing-library/react";
+            
+            test("render hello world as  text", () => {
+                render(<Greeting />);
+                
+                const helloWroldElement = screen.getByText("Hello world!");     // screen 을 통해, getByText(텍스트찾기 옵션) 으로 찾는다. 결과값을 변수에 저장한다. [getElementById 같은거다. 그에 해당하는 엘레먼트가 있나 찾는것]
+                expect(helloWroldElement).toBeInTheDocument();                  // 저장한 변수를 expect(예상) 하길, toBeInTheDocument() = 안에있을거다
+            });                                                                 // 맞으면 Pass 틀리면 Error
+            
+9. 테스트 코드 결과
+
+    PASS  src/components/Greeting.test.js
+    PASS  src/App.test.js
+
+    Test Suites: 2 passed, 2 total          // 비슷한 그룹을 가진 것들을 "Suite" 라고 한다. 즉, 비슷한 것들끼리 묶음단위로 Suite 를 만들어서 테스트한다. 
+    Tests:       2 passed, 2 total          //  각각의 테스트를 의미한다.
+    Snapshots:   0 total
+    Time:        3.49 s, estimated 8 s
+    Ran all test suites related to changed files.
+
+    Watch Usage: Press w to show more.
+
+10. 테스팅 Suite 관리
+
+    비슷한 Test 를 묶어 관리하는 Test Suite 를 만들어서, 관리해보자
+
+    "Suite 의 생성"은 "describe" 메서드를 사용한다.
+
+    < component / Greeting.test.js >
+
+        import Greeting from "./Greeting";
+        import { render, screen } from "@testing-library/react";
+        
+        describe("Greeting component", ()=>{                                    // suite 를 만들어, 설명하고, 그 안에 test 코드를 담는다.
+            test("render hello world as  text", () => {
+                render(<Greeting />);
+                
+                const helloWroldElement = screen.getByText("Hello world!");     // screen 을 통해, getByText(텍스트찾기 옵션) 으로 찾는다. 결과값을 변수에 저장한다.
+                expect(helloWroldElement).toBeInTheDocument();                  // 저장한 변수를 expect(예상) 하길, toBeInTheDocument() = 안에있을거다
+            });  
+        })
+
+
+11. 자 이제 실전이다! "버튼을 눌렀을때, State 가 변경되는 것" 에 대해 검사해보자.
+
+    < component / Greeting.js >
+
+            import { useState } from "react";
+
+            const Greeting = () => {
+                const [textChange, setTextChange] = useState(false);
+                return (
+                    <div>
+                        <div>
+                            <h2>Greeting !</h2>
+                            <p>Hello world!</p>
+                            <button onClick={() => setTextChange((prev) => !prev)}> Click</button>
+                        </div>
+                        <div>
+                            {textChange && <p> text Changed! </p>}
+                            {!textChange && <p> text not Changed! </p>}
+                        </div>
+                    </div>
+                );
+            };
+
+            export default Greeting;
+
+    ==> 버튼을 누르면 State 가 변하고, 변하면 컴포넌트가 렌더되는 간단한 코드이다.
+
+12. 이제 어떻게 테스트를 할지 생각한다.
+
+    1) 시나리오1 : 버튼을 안눌렀을때,  "text not Changed!" 가 보이는가 확인
+
+    2) 시나리오2 : 버튼을 눌렀을때, "text Changed!" 가 보이는가 확인
+
+    3) 시나리오3 : 버튼을 눌렀을때, "text not Changed!" 가 보이지 않아야 한다.
+
+
+13. 시나리오 1 : 버튼을 안눌렀을때,  "text not Changed!" 가 보이는가 확인
+
+    < component / Greeting.test.js >
+
+            import Greeting from "./Greeting";
+            import { render, screen } from "@testing-library/react";
+
+            describe("Greeting Component", () => {
+                test("render hello world as  text", () => {
+                    render(<Greeting />);
+
+                    const helloWroldElement = screen.getByText("Hello world!");
+                    expect(helloWroldElement).toBeInTheDocument();
+                });
+
+                test("renders text Changed! if button is Not Clicked", () => {      // 설명을 대강 입력한다.
+                    render(<Greeting />);
+
+                    const outputElement = screen.getByText("text not Changed", {exact : false});    // 똑같이 확인해본다. exact 옵션도 사용해본다.
+                    expect(outputElement).toBeInTheDocument();
+                });
+            });
+
+    ** "exact : false 옵션"은, 단어가 "포함되어있다면 OK"
+        원래대로라면, "완벽히 같아야 OK"
+
+    [결과] 
+        Test Suites: 2 passed, 2 total
+        Tests:       3 passed, 3 total
+        Snapshots:   0 total
+        Time:        3.408 s
+        Ran all test suites related to changed files.
+        
+14. 시나리오 2 : 버튼을 눌렀을때, "text Changed!" 가 보이는가 확인 (With Act)
+
+    import { render, screen } from "@testing-library/react";
+    import userEvent from "@testing-library/user-event";
+            ...
+
+        test("renders 'text Changed!' if button is Clicked", () => {
+            // Arrange
+            render(<Greeting />);
+
+            // Act
+            const buttonElement = screen.getByRole("button");           // Act 가 추가되었다. getByRole 로 버튼을 찾는다(어차피 하나라 상관없다. 무조건 이거다)
+            userEvent.click(buttonElement);                             // getByRole 말고, getByText 를 여전히 사용해도 된다. 그저, "getElementById" 같은 것이다. "엘레멘트를 찾아 선택하는것"
+                                                                        // 버튼을 골랐다면, "useEvent 를 import 하여", useEvent 를 꺼낸 후, "이벤트 리스너"를 달아서, 시작시킨다.
+            //Assert
+            const outputElement = screen.getByText("text Changed!");    // 확인 단계이다. "버튼을 Act 에서 눌렀다 가정"했으니, 
+            expect(outputElement).toBeInTheDocument();                  // getByText 로 텍스트를 지정해, toBeInTheDocument() 로 그것이 있나 확인한다.
+        });
+                
+15. 시나리오3 : 버튼을 눌렀을때, "text not Changed!" 가 보이지 않아야 한다.
+
+    import { render, screen } from "@testing-library/react";
+    import userEvent from "@testing-library/user-event";
+        ...
+
+        test("not renders 'text not Changed!' if button is Clicked", () => {
+            // Arrange
+            render(<Greeting />);
+        
+            // Act
+            const buttonElement = screen.getByRole("button");
+            userEvent.click(buttonElement);
+        
+            //Assert
+            const outputElement = screen.queryByText("text not Changed!", {     // 차이는 queryByText 로, 없다면 null 을 반환한다.
+              exact: false,
+            });
+            expect(outputElement).not.toBeInTheDocument();                      // 또한 not 을 사용하여, 없을것을 예상한다.
+        });
+
+
+16. props 를 받는 "연결된 컴포넌트 테스트하기"
+
+    < component / Output.js >
+        const Output = (props) => {
+            const { children } = props;
+        
+            return <p>{children}</p>;
+        };
+        export default Output;
+        
+    < component / Greeting.js >
+
+            ...
+                <button onClick={() => setTextChange((prev) => !prev)}> Click</button>
+            </div>
+            <div>
+                {textChange && <Output>text Changed!</Output>}
+                {!textChange && <Output>text not Changed!</Output>}
+            </div>
+        </div>
+
+    ==> Output 의 "핵심논리" 가 없기 때문에, "따로 테스트 분리는 하지 않아도 충분하며"
+        "Greeting 을 테스트하면서, 함께 Test 되는 것을 알 수 있다."
+
+        이것을 통합 테스트라고 한다. (그렇지만 여기에서는, Output 의 논리가 없기 때문에 통합테스트라 하기는 좀 뭐하다. 하지만 개념이 그렇다.)
+
+17. 비동기 함수의 테스트하기[ 1. 비동기 함수가 들어가는 컴포넌트]
+
+    비동기 함수가 들어가는 컴포넌트를 하나 만든다.
+
+    < Async.js >
+
+        import { useEffect, useState } from "react";
+
+            const Async = () => {
+                const [posts, setPosts] = useState([]);
+
+                useEffect(() => {
+                    fetch("https://jsonplaceholder.typicode.com/posts")
+                    .then((response) => response.json())
+                    .then((data) => {
+                        setPosts(data);
+                    });
+                }, []);
+
+                return (
+                    <div>
+                        <ul>
+                            {posts.map((post) => (
+                            <li key={post.id}>{post.title}</li>
+                            ))}
+                        </ul>
+                    </div>
+                );
+            };
+
+            export default Async;
+
+    ==> 이것이 우리가 테스트할 대상이다.
+
+18. 비동기 함수의 테스트하기 [2. 테스팅 코드 파일 만들기] with "getAllByRole" 의 지정방식
+
+        import { render, screen } from "@testing-library/react";
+        import Async from "./Async";
+
+        describe("Async Component", () => {
+            test("", () => {
+                // 준비
+                render(<Async />);
+
+                // "액션"이 필요 없다 그저 렌더만 하면되니까
+
+                // "확인"
+                const listItemElements = screen.getAllByRole("listitem");   // 리스트아이템 전체 선택
+                expect(listItemElements).not.toHaveLength(0);               // 길이가 0이 아님을 확인
+            });
+        });
+
+    ==> 어? listitem 을 getAllByRole로 선택했고, length 가 0이 아님을 확인했는데
+        분명히 렌더도 잘 되었을텐데 에러가난다.
+
+    ==> 이는 getAllByRole 이 지정하는 방식에 대해 알아야한다.
+
+19. 비동기 함수의 테스트하기 [3. 비동기에 의해 지정되지 못하는 점 해결하기] - get... 의 쿼리와 find... 쿼리의 차이!
+    
+    screen.getAllByRole 은 "렌더되자마자 바로 확인한다."
+    이는 첫 렌더된 이후 useEffect 에 의해 fetch 가 시작되는 동작에 의해, 이미 getAllByRole 은 지나가고 없는 상태다.
+    즉 빈 배열을 가져올것이다.
+
+    [get 으로 시작하는 쿼리는 직접 찾는다.]
+        시작하자마자 탁! 실행된다.
+
+        getByText
+        getAllByRole
+        getByRole
+        ...
+
+    [find 로 시작하는 쿼리는 프로미스를 반환한다.]      //  반환하는데 기다리는 시간과 exact 옵션을 넣을 수도 있다
+        비동기 함수에 적합하다.
+
+        findAllByRole
+        ...
+
+        findAllByRole("...", {exact : ...} , {timeout:...})     // 반환하는데 기다리는 시간과 exact 옵션을 넣을 수도 있다
+
+    [findAllByRole 을 사용해 코드 변경하기]
+
+        import { render, screen } from "@testing-library/react";
+        import Async from "./Async";
+
+        describe("Async Component", () => {
+            test("render posts if request succeeds", async () => {                  // async 를 사용, 비동기함수 생성
+                // 준비
+                render(<Async />);
+
+                // "액션"이 필요 없다 그저 렌더만 하면되니까
+
+                // "확인"
+                const listItemElements = await screen.findAllByRole("listitem");    // await 를 사용, 프로미스를 반환
+                expect(listItemElements).not.toHaveLength(0);                      
+            });
+        });
+
+20. HTTP 요청에 대해, 테스팅하는 방법
+
+    [HTTP 요청에 대해 테스트하는 방법]
+
+        1) http 요청에 대해 테스트를 하지 않는 방법
+        2) "http 가짜 요청" 을 보내서 테스트 하는 방법(데이터를 가져오거나, 보내거나, 하지 않도록 가짜 요청만)
+            * 테스트를 하려고 http 요청 보냈다가, DB 가 변동된다? 그거 큰일날일이지
+
+    [나의 선택은 1번]
+
+        fetch 를 잘 했다 "치고!" fetch 의 데이터를 테스트하도록하자.
+
+    [시나리오]
+
+        1) 응답데이터를 받았을때, 컴포넌트가 올바르게 작동하는가?
+        2) 에러가 발생했을때, 어떻게되는가?
+
+    [ fetch 함수를 따라하는 함수가 필요하다. ]
+
+        테스트코드에서 jest는 그럴 줄 알고 미리 준비해두었다.
+
+        1) "window 에 접근해, fetch 를 가져온다."
+        2) 이후, 그 것 안에, "jest" 의 "fn()" 메서드(함수를 따라하는 jest 의 기능) 를 넣는다.
+        3) 담긴 window.fetch 를 "따라하는 기능을 넣는다."
+        4) 어떤 데이터로 가져오는지( fetch 면 json 이지 뭐) 넣고, async () => []    //배열이면 배열, 객체면 객체
+        5) 그리고 실제 값을 하나만 넣어본다.
+
+            window.fetch = jest.fn()
+
+        짜잔!" fetch 함수가 이젠 jest 로 만든 가짜 함수로 변했다."
+        물론 "테스트 코드 안에서만!"
+
+        이제 jest 가 담긴 fetch 함수를, 더미함수로 만든다.
+
+        
+
+    [ 코드 ]
+
+        describe("Async Component", () => {
+            test("render posts if request succeeds", async () => {
+        
+                window.fetch = jest.fn();                                               // http 요청의 결과를 테스트
+                window.fetch.mockResolvedValueOnce({
+                    json: async () => [{ id: "p1", title: "First post" }],              // json 데이터가 올것이며, 그결과로 "배열" 에 담긴 "객체"중 "하나는 저 데이터일것이다."
+                });
+            
+                // 준비
+                render(<Async />);
+            
+                // "액션"이 필요 없다 그저 렌더만 하면되니까
+            
+                // "확인"
+                const listItemElements = await screen.findAllByRole("listitem"); // 리스트아이템 전체 선택
+                expect(listItemElements).not.toHaveLength(0); // 길이가 0이 아님을 확인
+            });
+        });
+
+    ==> "실제 서버에 요청을 보내지 않고, HTTP 를 테스트 하는 방법"
+        
+        
+21. 마치며, DOCS 를 잘 보도록 하자.
+
+    jest :                  https://jestjs.io/docs/mock-functions
+
+    리액트 테스팅 라이브러리 : https://testing-library.com/docs/react-testing-library/intro/
+
+        * 특히나 : 에코시스템을 잘보자
+
+    리액트 훅 테스팅 라이브러리 :https://react-hooks-testing-library.com/usage/basic-hooks#updates
+
+        * 리액트 훅에 대하여 좋다.
+
+
